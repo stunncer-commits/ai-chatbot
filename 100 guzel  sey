@@ -1,0 +1,305 @@
+import React, { useEffect, useMemo, useState } from "react";
+
+// ----------------------------------------------
+// Bugünün Mottosu — Minimal & Elegant (iOS-ready)
+// - Compact tipografi
+// - iOS ana ekrana ekleme ipucu
+// - 100 nedenlik liste (27. madde kaldırıldı)
+// ----------------------------------------------
+
+const TITLE = "Bugünün Mottosu";
+
+// 100 nedenlik liste — #27 bilinçli olarak çıkarıldı
+const REASONS: string[] = [
+  // 1–10
+  "Dişlerinle gülerken bile çok güzelsin.",
+  "Ses tonunla sakinleşiyorum çünkü biliyorum ki orada huzur var, evim sensin.",
+  "Gözlerinin içine bakınca kendimi güvende hissediyorum.",
+  "Sabırlısın, bu beni büyülüyor.",
+  "Sessizliğin bile huzur veriyor.",
+  "Elini tuttuğumda her şey yerli yerine oturuyor.",
+  "Kahkahan en karanlık günü bile aydınlatıyor.",
+  "Beni dinlerken gerçekten oradasın.",
+  "Gözlerindeki sıcaklık dünyayı yumuşatıyor.",
+  "Birlikteyken zamanın nasıl geçtiğini anlamıyorum.",
+  // 11–20
+  "Sarıldığında bütün endişelerim kayboluyor.",
+  "Beni güldürme şeklin çok doğal.",
+  "Her zaman nazik davranıyorsun, farkında olmadan bile.",
+  "Ben susarken bile beni anlıyorsun.",
+  "Beni olduğum gibi kabul ediyorsun.",
+  "Yanında çocuk gibi olabiliyorum.",
+  "Bana güven veriyorsun, bu çok değerli.",
+  "Sadece varlığın bile huzur.",
+  "Plan yaparken beni düşünmen kalbimi eritiyor.",
+  "Küçük şeylerle mutlu oluyorsun, bu seni çok saf kılıyor.",
+  // 21–30
+  "Bana sabırla yaklaşman beni büyütüyor.",
+  "Bazen sadece adını duymak yetiyor.",
+  "Beni motive ediyorsun.",
+  "Beraber yürürken adımlarımızın aynı ritimde oluşu hoşuma gidiyor.",
+  "Kollarında kendimi tamam hissediyorum.",
+  "Bana kendimi değerli hissettiriyorsun.",
+  // 27 çıkarıldı
+  "Benimle her şeyini paylaşıyorsun.",
+  "Güven duygusu sende çok güçlü, bu bana iyi geliyor.",
+  "Hayatımı seninle paylaşmak huzurlu hissettiriyor.",
+  // 31–40
+  "Küçük jestlerin kalbime dokunuyor.",
+  "Senden mesaj geldiğinde istemsizce gülüyorum.",
+  "Sesin yorgun günlerimin ilacı.",
+  "Bana ‘sakin ol’ dediğinde gerçekten sakinleşiyorum.",
+  "Zeki olman beni her zaman etkiliyor.",
+  "Mizah anlayışın tam bana göre.",
+  "Birlikte sessiz kalmak bile güzel.",
+  "Dokunuşların bana güven veriyor.",
+  "Hayata bakış açın olgun ve sade.",
+  "En karmaşık anlarda bile kontrolü kaybetmiyorsun.",
+  // 41–50
+  "Yanında kendim olabiliyorum.",
+  "Beni eleştirmek yerine anlamaya çalışıyorsun.",
+  "İnatçılığın bazen sinir bozucu ama tatlı.",
+  "Bana sabırla yaklaşman sevgini gösteriyor.",
+  "Yorgun olduğunda bile bana nazik davranıyorsun.",
+  "Küçük detayları hatırlaman beni şaşırtıyor.",
+  "Beni dinlerken göz teması kurman hoşuma gidiyor.",
+  "Beni rahatlatma yeteneğin inanılmaz.",
+  "Kahveni içerken seni izlemek bile keyif.",
+  "Uyurken yüzündeki huzur içimi ısıtıyor.",
+  // 51–60
+  "Ellerinin sıcaklığı kalbime geçiyor.",
+  "Benimle şakalaştığında bile tatlısın.",
+  "Birlikte yemek yapmak en güzel anlardan biri.",
+  "Aramızdaki sessizlik bile anlamlı.",
+  "Beni korumaya çalıştığında içim eriyor.",
+  "Bana güvenmen beni güçlü hissettiriyor.",
+  "Senden öğrenecek çok şeyim var.",
+  "Hayallerimle ilgileniyorsun.",
+  "Yüzümdeki mutsuzluğu hemen fark ediyorsun.",
+  "Sarılınca zaman duruyor gibi.",
+  // 61–70
+  "Her sabah seninle uyanmak fikri bile güzel.",
+  "Yanımda olmasan bile enerjini hissediyorum.",
+  "Bana karşı sabırlı olman sevgini anlatıyor.",
+  "Kalbimi yumuşatıyorsun.",
+  "Bana olan saygın her şeyden belli.",
+  "Yüzüme baktığında içim huzur doluyor.",
+  "Kalabalıkta bile beni fark ediyorsun.",
+  "Sadece sesin bile beni gülümsetiyor.",
+  "Kendini ifade ediş tarzın çok etkileyici.",
+  "Birlikte olduğumuzda dünya yavaşlıyor.",
+  // 71–80
+  "Beni olduğum gibi seviyorsun.",
+  "Kızsam bile sana kıyamıyorum.",
+  "Güldüğünde dünya biraz daha güzel oluyor.",
+  "Her mesajın günümün en tatlı anı.",
+  "Senden uzak olmak bile seni daha çok sevmemi sağlıyor.",
+  "Cümlelerinin arasında bile sevgi var.",
+  "Bana dokunduğunda kalbim hızlanıyor.",
+  "Yumuşak kalbin beni her defasında şaşırtıyor.",
+  "Beni anlamadığında bile deniyorsun.",
+  "Yorgun olsan da bana vakit ayırıyorsun.",
+  // 81–90
+  "Hatalarımı affetmen büyüklüğünü gösteriyor.",
+  "İyi kalplisin, bunu her halinle belli ediyorsun.",
+  "Birlikte geçirdiğimiz sıradan anlar bile özel oluyor.",
+  "Gülümsemeni özlemek bile güzel.",
+  "Beni hep destekliyorsun.",
+  "Birlikte hayal kurmak huzurlu.",
+  "Beni kimsenin anlamadığı gibi anlıyorsun.",
+  "Sadece elini tutmak bile bana yetiyor.",
+  "Beni güvende hissettiriyorsun.",
+  "Yanında her şey daha kolay.",
+  // 91–100
+  "Sana sarılınca dünyadaki her şey anlamsızlaşıyor.",
+  "Gözlerinin derinliği beni içine çekiyor.",
+  "Beni bazen delirtsen de sensiz yapamıyorum.",
+  "Beni olduğumdan daha iyi biri yapıyorsun.",
+  "Sesini duyduğumda kalbim sakinleşiyor.",
+  "Kıskanman bile tatlı geliyor.",
+  "Varlığın hayatıma anlam katıyor.",
+  "Her şey yolundaymış gibi hissettiriyorsun.",
+  "Seninle olmak en doğal halim.",
+  "Seni her geçen gün biraz daha çok seviyorum."
+];
+
+function dayOfYear(date: Date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff =
+    date.getTime() -
+    start.getTime() +
+    (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
+
+function pickTodayReason() {
+  const today = new Date();
+  const idx = dayOfYear(today) % REASONS.length;
+  return { text: REASONS[idx], index: idx };
+}
+
+function pickRandomReason(excludeIndex?: number) {
+  if (REASONS.length === 1) return { text: REASONS[0], index: 0 };
+  let idx = Math.floor(Math.random() * REASONS.length);
+  if (excludeIndex != null) {
+    let guard = 0;
+    while (idx === excludeIndex && guard < 5) {
+      idx = Math.floor(Math.random() * REASONS.length);
+      guard++;
+    }
+  }
+  return { text: REASONS[idx], index: idx };
+}
+
+function useIosStandaloneHint() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window as any).navigator.standalone;
+    if (isIOS && !isStandalone) setShow(true);
+  }, []);
+  return { show };
+}
+
+export default function LoveReasonsApp() {
+  const today = useMemo(() => pickTodayReason(), []);
+  const [current, setCurrent] = useState(today);
+  const { show } = useIosStandaloneHint();
+
+  // PWA: Service Worker kaydı (offline + hızlı açılış)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {/* sessizce yut */});
+    }
+  }, []);
+
+  const handleToday = () => setCurrent(pickTodayReason());
+  const handleRandom = () => setCurrent(pickRandomReason(current.index));
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(`${TITLE}:
+${current.text}`);
+      alert("Kopyalandı! Metin panoya eklendi.");
+    } catch (e) {
+      alert("Kopyalama desteklenmiyor. Lütfen metni elle kopyalayın.");
+    }
+  };
+
+  return (
+    <main className="min-h-screen w-full bg-white text-gray-900 flex items-center justify-center p-5">
+      <div className="w-full max-w-md">
+        <header className="text-center mb-6">
+          <h1 className="font-serif text-xl md:text-2xl font-medium tracking-tight">{TITLE}</h1>
+          <p className="mt-1 text-xs text-gray-500">Minimal ve elegant — beyaz arka plan.</p>
+        </header>
+
+        <section className="bg-white rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-4 md:p-5">
+          <div className="text-center">
+            <span className="inline-block text-[10px] tracking-wider uppercase text-gray-400">Günün Kartı</span>
+            <p className="mt-3 font-serif text-base md:text-lg leading-relaxed">
+              {current.text}
+            </p>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button onClick={handleToday} className="text-sm font-light px-3 py-1.5 rounded-xl border border-gray-200 hover:border-gray-300 active:scale-[0.99] transition">
+              Bugünün mottosu
+            </button>
+            <button onClick={handleRandom} className="text-sm font-light px-3 py-1.5 rounded-xl border border-gray-200 hover:border-gray-300 active:scale-[0.99] transition">
+              Rastgele göster
+            </button>
+            <button onClick={copyToClipboard} className="text-sm font-light px-3 py-1.5 rounded-xl border border-gray-200 hover:border-gray-300 active:scale-[0.99] transition">
+              Kopyala
+            </button>
+          </div>
+        </section>
+
+        <footer className="mt-5 text-center text-[10px] text-gray-400">
+          {show ? (
+            <p>📱 iPhone’da <strong>Paylaş</strong> → <strong>Ana Ekrana Ekle</strong> diyerek uygulama olarak kaydedebilirsin 🤍</p>
+          ) : (
+            <p>Keyfini çıkar — ana ekrandan açtığında tam ekran çalışır.</p>
+          )}
+        </footer>
+
+        {/* iOS/PWA Notları:
+  1) public/manifest.json oluştur:
+  {
+    "name": "Bugünün Mottosu",
+    "short_name": "Motto",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+      { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+      { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+  }
+  2) public/sw.js oluştur (çok basit cache-first):
+     const CACHE = 'motto-v1';
+     self.addEventListener('install', e => {
+       e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/','/index.html','/manifest.json'])));
+     });
+     self.addEventListener('fetch', e => {
+       e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+     });
+  3) index.html <head> içine ekle:
+     <link rel="manifest" href="/manifest.json" />
+     <meta name="apple-mobile-web-app-capable" content="yes" />
+     <meta name="apple-mobile-web-app-status-bar-style" content="white-translucent" />
+     <meta name="apple-mobile-web-app-title" content="Bugünün Mottosu" />
+     <link rel="apple-touch-icon" href="/icon-512.png" />
+     <meta name="theme-color" content="#ffffff" />
+  4) (Opsiyonel) iOS splash ekranları için 1170x2532, 1284x2778 vb. boyutlarda PNG ekleyip link et.
+  5) iPhone'da Safari → Paylaş → Ana Ekrana Ekle ile uygulama gibi kurulur.
+*/}
+      </div>
+    </main>
+  );
+}
+
+/* ----------------------------------------------
+ Ek Dosyalar — iOS PWA için gerekenler
+-----------------------------------------------
+
+// public/manifest.json
+{
+  "name": "Bugünün Mottosu",
+  "short_name": "Motto",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+
+// public/sw.js
+const CACHE = 'motto-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/index.html', '/manifest.json'])));
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+});
+
+// public/index.html (ilgili <head> bölümü)
+<link rel="manifest" href="/manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="white-translucent" />
+<meta name="apple-mobile-web-app-title" content="Bugünün Mottosu" />
+<link rel="apple-touch-icon" href="/icon-512.png" />
+<meta name="theme-color" content="#ffffff" />
+
+// Notlar:
+// - icon-192.png ve icon-512.png dosyalarını public/ klasörüne ekleyin.
+// - Projeyi yayınladıktan sonra (Vercel/Netlify) iPhone Safari → Paylaş → Ana Ekrana Ekle.
+----------------------------------------------- */
+
+
